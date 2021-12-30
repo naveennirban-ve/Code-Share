@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as UI;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -88,40 +89,36 @@ class AtomPaint extends CustomPainter {
 
   final double value;
   final ui.Image image;
-  final width;
+  final dynamic width;
 
+  /// To increase padding of logo from text increase 3 parameter("width * 0.23").
   @override
   void paint(Canvas canvas, Size size) {
-    //canvas.drawCircle(Offset(0, 0), 20.0, Paint()..color = Colors.yellow);
-    drawAxis(value, canvas, width * 0.2, Paint()..color = Colors.grey);
-    //canvas.drawImage(image, Offset.zero, Paint());
+    drawAxis(value, canvas, width * 0.23, Paint()..color = Colors.grey);
   }
 
   drawAxis(double value, Canvas canvas, double radius, Paint paint) {
     var firstAxis = getCirclePath(radius);
     UI.PathMetrics pathMetrics = firstAxis.computeMetrics();
     for (UI.PathMetric pathMetric in pathMetrics) {
-      Path extractPath = pathMetric.extractPath(
-        0.0,
-        pathMetric.length * value,
-      );
+      Path extractPath = pathMetric.extractPath(0, pathMetric.length * value);
       try {
         var metric = extractPath.computeMetrics().first;
         final offset = metric.getTangentForOffset(metric.length)?.position;
-        //ByteData data = image.toByteData() as ByteData;
+        canvas.drawImage(image, offset!, Paint());
 
-        canvas.drawImage(image, offset!, new Paint());
-
-        //canvas.drawCircle(offset!, 12.0, paint);
-    } catch (e) {}
-  }
+    } catch (e) {}}
   }
 
-  Path getCirclePath(double radius) =>
-      Path()..addOval(Rect.fromCircle(center: Offset(0, -10), radius: radius));
+  Path getCirclePath(double radius) {
+    Path path = Path();
 
-
-
+    /// Starting angle of animation
+    const startAngle = math.pi ;
+    const sweepAngle = math.pi*2;
+    path.addArc(Rect.fromCircle(center: const Offset(0,0), radius: radius),startAngle,sweepAngle);
+    return path;
+  }
   @override
   bool shouldRepaint(CustomPainter oldDelegate) {
     return true;
